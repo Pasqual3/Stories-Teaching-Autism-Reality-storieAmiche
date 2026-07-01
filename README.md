@@ -471,21 +471,31 @@ Copia il template qui sotto in un file `.env` nella root del progetto. **Non com
 
 ```env
 
-# ---- Configurazione generale ----
+# =============================================
+# FILE .env - VARIABILI D'AMBIENTE
+# NON condividere mai questo file pubblicamente!
+# =============================================
+
+# ---- Server ----
 PORT=4000
 NODE_ENV=development
 # NODE_ENV=production
 
-# ---- Database ----
+# ---- MongoDB ----
 # Con Docker, usa questa stringa di connessione:
 MONGODB_URI=mongodb://mongodb:27017/storieamiche
+
+FRONTEND_URL=frontend_url
 
 # ---- JWT (Sicurezza Token) ----
 JWT_SECRET=sostituisci_con_stringa_lunga_e_casuale
 INTERNAL_API_KEY=sostituisci_con_stringa_lunga_e_casuale
+# Chiave DEDICATA per la cifratura AES-256 dei dati clinici.
+# SEPARATA da JWT_SECRET: ruotare l'uno non invalida l'altro.
+ENCRYPTION_KEY=sostituisci_con_stringa_lunga_e_casuale
 ENCRYPTION_SALT=sostituisci_con_stringa_lunga_e_casuale
 
-# ---- Email (SMTP) ----
+# ---- Email (Nodemailer) ----
 # Indirizzo email per l'autenticazione SMTP
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -496,9 +506,7 @@ SMTP_PASS=tua_app_password_google
 # Email visualizzata come mittente
 SENDER_EMAIL=tua_email@gmail.com
 
-# ---- URL microservizi (rete interna Docker) ----
-FRONTEND_URL= http://localhost:5173
-
+# ---- Microservizi URL (Interni a Docker) ----
 EMAIL_SERVICE_URL=http://email-service:5008
 AI_SERVICE_URL=http://ai-service:5001
 STORAGE_SERVICE_URL=http://storage-service:5006
@@ -507,13 +515,14 @@ AUTH_SERVICE_URL=http://auth-service:5009
 ANALYTICS_SERVICE_URL=http://analytics-service:5007
 GATEWAY_URL=http://server:4000
 
-# ---- Cloudinary (storage media) ----
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
+#--- CREDENZIALI cloudinary (IMMAGINI/VIDEO/AUDIO)
+CLOUDINARY_CLOUD_NAME=tua_cloud_name
+CLOUDINARY_API_KEY=tua_api_key
+CLOUDINARY_API_SECRET=tua_api_secret
 # --- FINE CONFIGURAZIONE ---
 
 VITE_BACKEND_URL=http://localhost:4000
+
 ```
 
 > **Nota per la produzione** — imposta `NODE_ENV=production`, sostituisci `FRONTEND_URL` con il tuo dominio reale e genera valori casuali robusti per `JWT_SECRET` e `INTERNAL_API_KEY`.
