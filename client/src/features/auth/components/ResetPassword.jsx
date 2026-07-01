@@ -87,13 +87,6 @@ const ResetPassword = () => {
         <title>Reset Password — Storie Amiche</title>
         <meta name="description" content="Resetta la password del tuo account Storie Amiche." />
       </Helmet>
-
-      <img
-        onClick={() => navigate("/")}
-        src={assets.myLogo}
-        alt=""
-        className="absolute left-5 sm:left-20 top-0 w-28 sm:w-32 cursor-pointer"
-      />
       {/* email sent */}
       {!isEmailSent && (
         <div
