@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { pollAudioJob } from './useAudioPolling';
+import { pollAudioJob } from '../useAudioPolling';
 
 export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
     const [activeGenerations, setActiveGenerations] = useState([]);

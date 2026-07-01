@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { CACHE_KEY } from '../features/home/utils/storyCache';
+import { CACHE_KEY } from '../../features/home/utils/storyCache';
 
 export const useStorySaver = (backendUrl, getUserData) => {
     const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
