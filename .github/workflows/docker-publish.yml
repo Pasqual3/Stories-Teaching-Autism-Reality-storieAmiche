@@ -1,0 +1,98 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches: [ "main" ] # Si attiva quando fai il push sul ramo main
+
+env:
+  REGISTRY: ghcr.io
+  # Il nome dell'immagine sarà basato sul nome del tuo repository (es: pasqual3/stories-teaching-autism...)
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lowercase repo name
+        run: |
+          echo "IMAGE_NAME_LOWER=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 1. AI SERVICE
+      - name: Build and push AI Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/ai-service:latest
+
+      # 2. SERVER (Gateway)
+      - name: Build and push Server
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/server:latest
+
+      # 3. CLIENT (Frontend)
+      - name: Build and push Client
+        uses: docker/build-push-action@v5
+        with:
+          context: ./client
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/client:latest
+          build-args: |
+            VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL }}
+
+      # 4. AUTH SERVICE
+      - name: Build and push Auth Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./auth-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/auth-service:latest
+
+      # 5. ANALYTICS SERVICE
+      - name: Build and push Analytics Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./analytics-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/analytics-service:latest
+
+      # 6. MONITORING SERVICE
+      - name: Build and push Monitoring Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./monitoring-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/monitoring-service:latest
+
+      # 7. STORAGE SERVICE
+      - name: Build and push Storage Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./storage-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/storage-service:latest
+
+      # 8. EMAIL SERVICE
+      - name: Build and push Email Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./email-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_LOWER }}/email-service:latest

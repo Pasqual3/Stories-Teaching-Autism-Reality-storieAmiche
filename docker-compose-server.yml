@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+
+  # ---- MongoDB Database ----
+  mongodb:
+    image: mongo:7.0
+    container_name: storieamiche_db
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: storieamiche
+
+  # ---- API Gateway ----
+  server:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/server:latest
+    container_name: storieamiche_server
+    restart: always
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb
+    env_file: .env
+
+  # ---- Frontend Client ----
+  client:
+    build:
+      context: ./client
+      args:
+        VITE_BACKEND_URL: https://api-storieamiche.intint.qzz.io
+
+  # ---- AI Service (Python/PyTorch) ----
+  ai-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/ai-service:latest
+    container_name: storieamiche_ai
+    restart: always
+    env_file: .env
+
+  # ---- Auth Service ----
+  auth-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/auth-service:latest
+    container_name: storieamiche_auth
+    restart: always
+    depends_on:
+      - mongodb
+    env_file: .env
+
+  # ---- Analytics Service ----
+  analytics-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/analytics-service:latest
+    container_name: storieamiche_analytics
+    restart: always
+    depends_on:
+      - mongodb
+    env_file: .env
+
+  # ---- Email Service ----
+  email-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/email-service:latest
+    container_name: storieamiche_email
+    restart: always
+    env_file: .env
+
+  # ---- Storage Service ----
+  storage-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/storage-service:latest
+    container_name: storieamiche_storage
+    restart: always
+    env_file: .env
+
+  # ---- Monitoring Service ----
+  monitoring-service:
+    image: ghcr.io/pasqual3/stories-teaching-autism-reality-storieamiche/monitoring-service:latest
+    container_name: storieamiche_monitoring
+    restart: always
+    env_file: .env
+
+volumes:
+  mongodb_data:

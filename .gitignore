@@ -1,0 +1,32 @@
+# Dipendenze
+node_modules/
+dist/
+
+# Environment
+.env
+**/.env
+**/.env.local
+
+# Upload e file temporanei
+server/uploads/
+server/temp_audio/
+
+# Python
+**/venv/
+**/__pycache__/
+*.pyc
+
+# AI Service — chiavi e dati sensibili
+ai-service/keys.json
+ai-service/audio_output/
+ai-service/service_debug.log
+
+# Pesi e modelli ML
+*.onnx
+*.pth
+*.bin
+*.model
+
+# Log
+server/logs/
+*.log

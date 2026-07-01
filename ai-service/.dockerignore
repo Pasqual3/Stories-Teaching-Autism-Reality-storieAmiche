@@ -1,0 +1,21 @@
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+
+# Audio generato a runtime (non serve nel build context)
+audio_output/
+app/
+
+# Ambiente virtuale locale
+.venv
+venv/
+
+# Variabili d'ambiente e git
+.env
+keys.json
+.git
+.gitignore
+*.md

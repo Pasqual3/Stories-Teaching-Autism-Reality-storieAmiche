@@ -1,0 +1,172 @@
+version: '3.8'
+
+services:
+
+  # ---- MongoDB Database ----
+  mongodb:
+    image: mongo:7.0
+    container_name: storieamiche_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: storieamiche
+
+  # ---- Backend Node.js/Express (API Gateway) ----
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: storieamiche_server
+    restart: always
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongodb
+      - email-service
+      - ai-service
+      - storage-service
+      - auth-service
+    environment:
+      - PORT=4000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - NODE_ENV=production
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+      - EMAIL_SERVICE_URL=${EMAIL_SERVICE_URL}
+      - AI_SERVICE_URL=${AI_SERVICE_URL}
+      - STORAGE_SERVICE_URL=${STORAGE_SERVICE_URL}
+      - MONITORING_SERVICE_URL=${MONITORING_SERVICE_URL}
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+    volumes:
+      - ./server/logs:/app/logs
+
+  # ---- Microservizio Storage (Cloudinary) ----
+  storage-service:
+    build:
+      context: ./storage-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_storage
+    restart: always
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+
+  # ---- Microservizio Email ----
+  email-service:
+    build:
+      context: ./email-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_email
+    restart: always
+    ports:
+      - "5008:5008"
+    environment:
+      - PORT=5008
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SENDER_EMAIL=${SENDER_EMAIL}
+
+  # ---- Microservizio AI (Python/Flask + Kokoro) ----
+  ai-service:
+    build:
+      context: ./ai-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_ai
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+    volumes:
+      - huggingface_cache:/root/.cache/huggingface
+
+  # ---- Microservizio di Monitoraggio ----
+  monitoring-service:
+    build:
+      context: ./monitoring-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_monitoring
+    restart: always
+    ports:
+      - "5005:5005"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=5005
+      - MONGODB_URI=${MONGODB_URI}
+
+  # ---- Frontend React/Vite ----
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: storieamiche_client
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+      - monitoring-service
+
+  # ---- Microservizio di Autenticazione ----
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_auth
+    restart: always
+    ports:
+      - "5009:5009"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=5009
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - EMAIL_SERVICE_URL=http://email-service:5008
+
+  # ---- Microservizio Analytics (Dati e Stress Index) ----
+  analytics-service:
+    build:
+      context: ./analytics-service
+      dockerfile: Dockerfile
+    container_name: storieamiche_analytics
+    restart: always
+    depends_on:
+      - mongodb
+      - server
+    environment:
+      - PORT=5007
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+      - GATEWAY_URL=${GATEWAY_URL}
+      - MONITORING_SERVICE_URL=${MONITORING_SERVICE_URL}
+      - ANALYTICS_SERVICE_URL=${ANALYTICS_SERVICE_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      # Chiave di cifratura dedicata per i dati clinici (SEPARATA da JWT_SECRET).
+      # Aggiungere entrambe al file .env locale prima di avviare i container.
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - ENCRYPTION_SALT=${ENCRYPTION_SALT}
+
+# Volumi persistenti
+volumes:
+  mongodb_data:
+  huggingface_cache:
