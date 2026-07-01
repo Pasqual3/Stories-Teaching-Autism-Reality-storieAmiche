@@ -20,7 +20,7 @@ import ResetPassword from './features/auth/components/ResetPassword'
 const ViewStory = lazy(() => import('./features/story/components/viewStory'))
 const ViewEmoGame = lazy(() => import('./features/emoGame/components/viewEmoGame'))
 const NewStory = lazy(() => import('./features/story/pages/NewStory'))
-const NewEmoGame = lazy(() => import('./features/emoGame/pages/newEmoGame'))
+const NewEmoGame = lazy(() => import('./features/emoGame/pages/EmoGame'))
 const SequencingGame = lazy(() => import('./features/games/SequencingGame'))
 const EmotionMatchingGame = lazy(() => import('./features/games/EmotionMatchingGame'))
 const TherapistAnalytics = lazy(() => import('./features/therapist/TherapistAnalytics'))
