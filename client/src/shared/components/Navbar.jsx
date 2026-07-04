@@ -150,6 +150,12 @@ const Navbar = ({ children }) => {
                         >
                           🎮 Nuovo EmoGame
                         </li>
+                        <li
+                          onClick={() => { navigate('/adaptiveNarration'); setIsActivitiesOpen(false); }}
+                          className="py-2.5 px-4 hover:bg-purple-50 rounded-lg text-sm font-bold text-gray-800 cursor-pointer flex items-center gap-2 transition-colors"
+                        >
+                          📖 Adaptive Story
+                        </li>
                       </ul>
                     )}
                   </li>
@@ -302,6 +308,7 @@ const Navbar = ({ children }) => {
                   <div className="flex flex-col gap-2 pl-2">
                     <span onClick={() => navMobile('/newStory')} className="text-sm hover:text-purple-600 cursor-pointer flex items-center gap-2">📝 Nuova Storia</span>
                     <span onClick={() => navMobile('/newEmoGame')} className="text-sm hover:text-purple-600 cursor-pointer flex items-center gap-2">🎮 Nuovo EmoGame</span>
+                    <span onClick={() => navMobile('/adaptiveNarration')} className="text-sm hover:text-purple-600 cursor-pointer flex items-center gap-2">📖 Adaptive Story</span>
                   </div>
                 </li>
 

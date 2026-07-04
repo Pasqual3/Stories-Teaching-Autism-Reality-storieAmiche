@@ -6,6 +6,7 @@ import { deleteEmoGame } from '../controller/emoGame/deleteEmoGame.js';
 import { assignEmoGameToChildren, toggleEmoGameVisibility } from '../controller/emoGame/assignEmoGame.js';
 import { saveEmoGameSession } from '../controller/emoGame/saveEmoGameSession.js';
 import { getEmoGameSessions } from '../controller/emoGame/getEmoGameSessions.js';
+import { generateAdaptiveStory } from '../controller/emoGame/generateAdaptiveStory.js';
 import { userAuth } from '../middleware/userAuth.js';
 import { upload } from '../middleware/uploadMiddleware.js';
 import { validateStory } from '../middleware/validators.js';
@@ -64,6 +65,7 @@ emoGameRouter.get('/presets', userAuth, async (req, res) => {
     }
 });
 
+emoGameRouter.post('/adaptive-story', userAuth, generateAdaptiveStory);
 emoGameRouter.post('/create', userAuth, upload.any(), validateStory, createEmoGame);
 emoGameRouter.get('/my-emogames', userAuth, getUserEmoGames);
 emoGameRouter.get('/child-emogames', getChildEmoGames);

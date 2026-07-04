@@ -80,3 +80,37 @@ export const pollAudioJob = async (jobId) => {
         return { success: false, status: 'error', message: error.message };
     }
 };
+
+/**
+ * Genera una narrazione adattiva (5 scene) tramite il microservizio ai-service (OpenRouter),
+ * tenendo conto della baseline/stress del bambino calcolata dall'analytics-service.
+ * @param {Object} options
+ * @param {string} options.topic          - Argomento della storia
+ * @param {string} options.initialEmotion - Emozione iniziale selezionata per il bambino
+ * @param {string} [options.childName]    - Nome del bambino (opzionale)
+ * @param {string} [options.stressLevel]  - Livello di stress calcolato (calm/mild/moderate/high)
+ * @param {number} [options.stressIndex]  - Indice numerico di stress (0-100)
+ * @returns {Object} { success, scenes, title, description, source }
+ */
+export const generateAdaptiveStory = async ({ topic, initialEmotion, childName, stressLevel, stressIndex }) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60 * 1000); // 1 min
+
+    try {
+        const response = await fetch(`${AI_SERVICE_URL}/adaptive-story`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic, initialEmotion, childName, stressLevel, stressIndex }),
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.message || `AI Service ha risposto con status ${response.status}`);
+        }
+
+        return await response.json();
+    } finally {
+        clearTimeout(timeoutId);
+    }
+};

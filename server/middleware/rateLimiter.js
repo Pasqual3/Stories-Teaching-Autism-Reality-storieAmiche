@@ -15,7 +15,8 @@ export const generalLimiter = rateLimit({
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Troppe richieste! Per favore, riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppe richieste! Per favore, riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 // ============================================================
@@ -27,7 +28,8 @@ export const authLimiter = rateLimit({
     max: 30,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Per favore, riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Per favore, riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 // ============================================================
@@ -39,7 +41,8 @@ export const audioLimiter = rateLimit({
     max: 15,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Limite generazioni audio raggiunto! Per favore, riprova tra 1 ora." }
+    message: { success: false, message: "⚠️ Limite generazioni audio raggiunto! Per favore, riprova tra 1 ora." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 
@@ -50,6 +53,7 @@ export const otpLimiter = rateLimit({
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Troppi tentativi OTP! Per favore, riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppi tentativi OTP! Per favore, riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
  

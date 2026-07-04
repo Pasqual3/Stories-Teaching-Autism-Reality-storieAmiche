@@ -25,13 +25,15 @@ app.use(helmet());
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 1000,
-    message: { success: false, message: "⚠️ Troppe richieste! Per favore, riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppe richieste! Per favore, riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 500,
-    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Per favore, riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Per favore, riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 app.use(generalLimiter);

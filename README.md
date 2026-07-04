@@ -521,6 +521,10 @@ CLOUDINARY_API_KEY=tua_api_key
 CLOUDINARY_API_SECRET=tua_api_secret
 # --- FINE CONFIGURAZIONE ---
 
+#--- CREDENZIALI openrouter (AI) per generazione narrazione e sintesi vocale
+OPENROUTER_API_KEY=la_tua_chiave_openrouter
+# --- FINE CONFIGURAZIONE ---
+
 VITE_BACKEND_URL=http://localhost:4000
 
 ```

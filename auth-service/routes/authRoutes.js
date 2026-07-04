@@ -20,7 +20,8 @@ const authLimiter = rateLimit({
     max: 20,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppi tentativi di accesso! Riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 // Limite OTP: 10 tentativi / 15 min per IP
@@ -30,7 +31,8 @@ const otpLimiter = rateLimit({
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
-    message: { success: false, message: "⚠️ Troppi tentativi OTP! Riprova tra 15 minuti." }
+    message: { success: false, message: "⚠️ Troppi tentativi OTP! Riprova tra 15 minuti." },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 
 export const authRouter = express.Router();

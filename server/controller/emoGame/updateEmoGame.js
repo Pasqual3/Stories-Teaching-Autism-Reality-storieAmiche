@@ -106,6 +106,8 @@ export const updateEmoGame = async (req, res) => {
             color: p.color || 'bg-white',
             mediaUrl: p.mediaUrl || '',
             emotion: p.emotion || '',
+            imageSuggestion: p.imageSuggestion || '',
+            isBranching: p.isBranching || false,
             strangeStoryTest: {
                 active: true, // Always true for EmoGames
                 question: p.strangeStoryTest?.question || '',
@@ -116,7 +118,9 @@ export const updateEmoGame = async (req, res) => {
                     imageUrl: opt.imageUrl || '',
                     isCorrect: opt.isCorrect ?? null,
                     score: opt.score ?? null,
-                    explanation: opt.explanation || ''
+                    explanation: opt.explanation || '',
+                    nextSceneText: opt.nextSceneText || '',
+                    nextSceneIndex: opt.nextSceneIndex ?? null
                 })),
                 correctAnswer: p.strangeStoryTest?.correctAnswer || '',
                 explanation: p.strangeStoryTest?.explanation || ''

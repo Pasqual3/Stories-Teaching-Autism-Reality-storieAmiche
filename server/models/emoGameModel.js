@@ -41,6 +41,17 @@ const emoGameSceneSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    // Suggerimento immagine generato dall'IA (Narrazione Adattiva), mostrato come badge nell'editor
+    imageSuggestion: {
+        type: String,
+        default: ""
+    },
+    // Scena a bivio (Narrazione Adattiva): le opzioni cambiano il ramo della storia
+    // invece di essere un quiz corretta/errata con punteggio
+    isBranching: {
+        type: Boolean,
+        default: false
+    },
     // --- STRANGE STORIES TEST (Theory of Mind) ---
     strangeStoryTest: {
         active: {
@@ -62,7 +73,10 @@ const emoGameSceneSchema = new mongoose.Schema({
             imageUrl: String,    // used for blocchi_immagine (remote URL)
             isCorrect: { type: Boolean, default: null },   // null = non classificata
             score: { type: Number, default: null },        // punteggio opzionale
-            explanation: { type: String, default: '' }     // feedback per questa opzione
+            explanation: { type: String, default: '' },    // feedback per questa opzione
+            // --- Campi Narrazione Adattiva (scene a bivio) ---
+            nextSceneText: { type: String, default: '' },  // testo del ramo mostrato se questa opzione è scelta
+            nextSceneIndex: { type: Number, default: null } // indice scena a cui saltare (branching)
         }],
         correctAnswer: {
             type: String,

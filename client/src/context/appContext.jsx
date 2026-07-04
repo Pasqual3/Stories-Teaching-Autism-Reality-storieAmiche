@@ -19,12 +19,15 @@ export const AppContextProvider = (props) => {
   const saver = useStorySaver(backendUrl, auth.getUserData);
   const audio = useAudioManager(backendUrl, auth.getUserData, auth.isLoggedinRef);
 
+  const { userData, getAuthState, clearAuth, intentionalLogoutRef } = auth;
+  const { healChildState, setActiveChildPersisted } = child;
+
   // Heal child state quando userData arriva dal server
   useEffect(() => {
-    if (auth.userData) {
-      child.healChildState(auth.userData);
+    if (userData) {
+      healChildState(userData);
     }
-  }, [auth.userData, child.healChildState]);
+  }, [userData, healChildState]);
 
   // Interceptor globale (deve vedere auth + child + navigate)
   useEffect(() => {
@@ -44,10 +47,10 @@ export const AppContextProvider = (props) => {
 
         if (status === 401 || status === 403) {
           if (isAuthRequest) return Promise.reject(error);
-          if (auth.intentionalLogoutRef.current) return Promise.reject(error);
+          if (intentionalLogoutRef.current) return Promise.reject(error);
 
-          auth.clearAuth();
-          child.setActiveChildPersisted(null);
+          clearAuth();
+          setActiveChildPersisted(null);
           navigate('/login');
           toast.warning('⚠️ Sessione scaduta. Effettua di nuovo il login.');
         } else if (status === 429) {
@@ -61,12 +64,12 @@ export const AppContextProvider = (props) => {
       }
     );
 
-    auth.getAuthState();
+    getAuthState();
 
     return () => {
       axios.interceptors.response.eject(interceptor);
     };
-  }, [auth, child, navigate]);
+  }, [getAuthState, clearAuth, intentionalLogoutRef, setActiveChildPersisted, navigate]);
 
   // Logout wrapper: se è attiva la modalità bambino, apre la modale invece di fare logout diretto
   const logoutAction = useCallback(async () => {

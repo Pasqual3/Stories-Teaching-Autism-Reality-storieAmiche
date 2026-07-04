@@ -61,7 +61,8 @@ const paragraphSchema = new mongoose.Schema({
             imageUrl: String,    // used for blocchi_immagine (remote URL)
             isCorrect: { type: Boolean, default: null },   // null = non classificata
             score: { type: Number, default: null },        // punteggio opzionale
-            explanation: { type: String, default: '' }     // feedback per questa opzione
+            explanation: { type: String, default: '' },    // feedback per questa opzione
+            imageSuggestion: { type: String, default: '' }
         }],
         correctAnswer: {
             type: String,

@@ -25,6 +25,7 @@ const SequencingGame = lazy(() => import('./features/games/SequencingGame'))
 const EmotionMatchingGame = lazy(() => import('./features/games/EmotionMatchingGame'))
 const TherapistAnalytics = lazy(() => import('./features/therapist/TherapistAnalytics'))
 const Profile = lazy(() => import('./features/profile/index'))
+const AdaptiveNarration = lazy(() => import('./features/adaptiveStorytelling/pages/AdaptiveStorytelling'))
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const { isLoggedin, userData, isCheckingAuth } = useContext(appContext);
@@ -77,6 +78,7 @@ const App = () => {
           <Route path="/edit-story/:id" element={<ProtectedRoute><NewStory /></ProtectedRoute>} />
           <Route path='/newEmoGame' element={<ProtectedRoute><NewEmoGame /></ProtectedRoute>} />
           <Route path='/edit-emoGame/:id' element={<ProtectedRoute><NewEmoGame /></ProtectedRoute>} />
+          <Route path='/adaptiveNarration' element={<ProtectedRoute><AdaptiveNarration /></ProtectedRoute>} />
           <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path='/email-verify' element={<EmailVerify />} />
           <Route path='/reset-password' element={<ResetPassword />} />

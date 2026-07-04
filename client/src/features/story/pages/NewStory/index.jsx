@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../../../../shared/components/Navbar';
 import { useStoryForm } from './hooks/useStoryForm';
-import { useAudioManager } from './hooks/useAudioManager';
+import { useAudioManager } from '../../../../shared/hooks/useAudioManager';
 import { useStoryPublisher } from './hooks/useStoryPublisher';
 import { appContext } from '../../../../context/appContext';
 import { toast } from 'react-toastify';
@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 // Components
 import StoryMetadataForm from './components/StoryMetadataForm';
 import GameOptionsPanel from './components/GameOptionsPanel';
-import AudioSection from './components/AudioSection';
+import AudioSection from '../../../../shared/components/AudioSection';
 import SceneEditor from './components/SceneEditor';
 import ActionButtons from './components/ActionButtons';
 import { Helmet } from "react-helmet-async";

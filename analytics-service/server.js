@@ -24,7 +24,8 @@ app.use(helmet());
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: { success: false, message: 'Troppe richieste, riprova più tardi.' }
+    message: { success: false, message: 'Troppe richieste, riprova più tardi.' },
+    skip: () => process.env.NODE_ENV === 'development'
 });
 app.use(generalLimiter);
 app.use(mongoSanitize());

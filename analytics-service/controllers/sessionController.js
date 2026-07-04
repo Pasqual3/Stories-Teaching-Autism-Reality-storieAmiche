@@ -5,6 +5,11 @@ import { sendLog } from '../utils/logger.js';
 import { encrypt, decrypt, encryptNumber, decryptNumber, encryptJson, decryptJson } from '../utils/encryption.js';
 
 // Decifra una sessione prima di inviarla al frontend
+// NOTA: childId NON è cifrato (vedi createSession) perché deve restare
+// interrogabile con una query di uguaglianza; encrypt() usa un IV casuale
+// quindi non è mai adatto come chiave di ricerca. decrypt() qui è comunque
+// tollerante e restituisce il valore invariato se non è nel formato cifrato,
+// quindi resta sicuro anche su eventuali record legacy già cifrati.
 const decryptSession = (sessionObj) => ({
     ...sessionObj,
     childId: decrypt(sessionObj.childId),
@@ -65,7 +70,11 @@ export const createSession = async (req, res) => {
         const safeStressIndex = isNaN(stressIndex) ? 0 : stressIndex;
 
         const session = new Session({
-            childId: encrypt(String(childId)),
+            // childId in chiaro: deve restare interrogabile (vedi getSessionsByChild).
+            // encrypt() usa un IV casuale ad ogni chiamata quindi due cifrature
+            // dello stesso childId non sono mai uguali tra loro: usarlo come
+            // filtro di query restituirebbe sempre zero risultati.
+            childId: String(childId),
             storyId: storyId ? String(storyId) : undefined,
             parentId: parentId ? String(parentId) : undefined,
             deviceType: deviceType || 'desktop',
@@ -149,7 +158,7 @@ export const getSessionsByChild = async (req, res) => {
         const { childId } = req.params;
         const { limit = 20 } = req.query;
 
-        const sessions = await Session.find({ childId: encrypt(childId) })
+        const sessions = await Session.find({ childId: String(childId) })
             .sort({ createdAt: -1 })
             .limit(parseInt(limit));
 
