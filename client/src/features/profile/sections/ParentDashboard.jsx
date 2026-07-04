@@ -23,7 +23,8 @@ const ParentDashboard = ({
   const [activeTab, setActiveTab] = useState('stories');
 
   const regularStories = stories.filter(s => !s.gameType || s.gameType === 'story');
-  const emoGames = stories.filter(s => s.gameType === 'emoGame');
+  const emoGames = stories.filter(s => s.gameType === 'emoGame' && !s.isAdaptive);
+  const adaptiveStories = stories.filter(s => s.gameType === 'emoGame' && s.isAdaptive);
 
   return (
     <div className="flex flex-col gap-10">
@@ -50,6 +51,13 @@ const ParentDashboard = ({
                   className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-black transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                 >
                   <span>➕</span> Crea Storia
+                </button>
+              ) : activeTab === 'adaptive' ? (
+                <button
+                  onClick={() => navigate('/adaptiveNarration')}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-black transition-all shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  <span>➕</span> Crea Adaptive Story
                 </button>
               ) : (
                 <button
@@ -94,6 +102,22 @@ const ParentDashboard = ({
                 {emoGames.length}
               </span>
             </button>
+            <button
+              onClick={() => setActiveTab('adaptive')}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                activeTab === 'adaptive'
+                  ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200/50'
+              }`}
+            >
+              <span>📖</span> Adaptive Story
+              <span className={`text-xs px-2 py-0.5 rounded-full font-black ${
+                activeTab === 'adaptive' ? 'bg-purple-700 text-white' : 'bg-gray-200 text-gray-700'
+              }`}>
+                {adaptiveStories.length}
+              </span>
+            </button>
+
           </div>
         </div>
 
@@ -109,9 +133,20 @@ const ParentDashboard = ({
               onDeleteStory={onDeleteStory}
               onAssign={onAssignStory}
             />
-          ) : (
+          ) : activeTab === 'emogames' ? (
             <ParentStories
               stories={emoGames}
+              gameType="emoGame"
+              savingStoryIds={savingStoryIds}
+              activeGenerations={activeGenerations}
+              onToggleVisibility={onToggleVisibility}
+              onDeleteStory={onDeleteStory}
+              onAssign={onAssignStory}
+              myChildren={myChildren}
+            />
+          ) : (
+            <ParentStories
+              stories={adaptiveStories}
               gameType="emoGame"
               savingStoryIds={savingStoryIds}
               activeGenerations={activeGenerations}

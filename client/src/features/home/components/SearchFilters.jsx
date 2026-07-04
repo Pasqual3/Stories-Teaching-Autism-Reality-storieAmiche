@@ -77,6 +77,11 @@ export const SearchFilters = ({
       setSelectedDifficulty('all');
       if (setSelectedStoryKind) setSelectedStoryKind('Tutte');
       if (setSelectedGame) setSelectedGame('Tutti');
+    } else if (val === 'adaptiveStory') {
+      setSelectedType('adaptiveStory');
+      setSelectedDifficulty('all');
+      if (setSelectedStoryKind) setSelectedStoryKind('Tutte');
+      if (setSelectedGame) setSelectedGame('Tutti');
     } else if (val === 'strangeStory') {
       setSelectedType('story');
       setSelectedDifficulty('all');
@@ -86,8 +91,8 @@ export const SearchFilters = ({
   };
 
   const showDifficultyFilter = selectedType !== 'story';
-  const showStoryKindFilter  = selectedType !== 'emoGame' && !(selectedType === 'story' && selectedStoryKind === 'Strange Story');
-  const showGameFilter       = selectedType !== 'emoGame';
+  const showStoryKindFilter  = selectedType !== 'emoGame' && selectedType !== 'adaptiveStory' && !(selectedType === 'story' && selectedStoryKind === 'Strange Story');
+  const showGameFilter       = selectedType !== 'emoGame' && selectedType !== 'adaptiveStory';
 
   return (
     <div className="w-full max-w-4xl mb-10">
@@ -176,10 +181,11 @@ export const SearchFilters = ({
                 <div className="flex flex-col gap-2 md:col-span-3">
                   <label className="text-[10px] font-black text-purple-700 uppercase tracking-widest ml-1">🎮 Tipo Attività</label>
                   <div className="flex bg-purple-50/50 p-1 rounded-xl border border-purple-100 w-full">
-                    <SegmentBtn id="all"          label="Tutte"         current={currentActivityType} onChange={handleTypeChange} />
-                    <SegmentBtn id="story"        label="Storie"        current={currentActivityType} onChange={handleTypeChange} />
-                    <SegmentBtn id="emoGame"      label="Giochi"        current={currentActivityType} onChange={handleTypeChange} />
-                    <SegmentBtn id="strangeStory" label="Strange Story" current={currentActivityType} onChange={handleTypeChange} />
+                    <SegmentBtn id="all"           label="Tutte"          current={currentActivityType} onChange={handleTypeChange} />
+                    <SegmentBtn id="story"         label="Storie"         current={currentActivityType} onChange={handleTypeChange} />
+                    <SegmentBtn id="emoGame"       label="Giochi"         current={currentActivityType} onChange={handleTypeChange} />
+                    <SegmentBtn id="adaptiveStory" label="Adaptive Story" current={currentActivityType} onChange={handleTypeChange} />
+                    <SegmentBtn id="strangeStory"  label="Strange Story"  current={currentActivityType} onChange={handleTypeChange} />
                   </div>
                 </div>
 

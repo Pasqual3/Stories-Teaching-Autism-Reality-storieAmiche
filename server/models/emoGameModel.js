@@ -137,6 +137,11 @@ const emoGameSchema = new mongoose.Schema({
         default: true
     },
 
+    isAdaptive: {
+        type: Boolean,
+        default: false
+    },
+
     // --- STILE GENERALE ---
     backgroundColor: {
         type: String,

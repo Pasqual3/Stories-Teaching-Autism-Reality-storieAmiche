@@ -71,7 +71,13 @@ export const useStories = (backendUrl, userData) => {
     // story.gameType è ora sempre impostato dal backend ('story' o 'emoGame');
     // il fallback 'story' resta per sicurezza nel caso di dati non ancora aggiornati in cache.
     const storyGameType = story.gameType || 'story';
-    const matchesType = selectedType === "all" || storyGameType === selectedType;
+    // Le Adaptive Story sono salvate con gameType 'emoGame' + isAdaptive:true.
+    // Le trattiamo come un tipo virtuale a sé stante ('adaptiveStory'), separato
+    // sia da 'story' che da 'emoGame' puro, così hanno un tab/filtro dedicato.
+    const effectiveType = (storyGameType === 'emoGame' && story.isAdaptive === true)
+      ? 'adaptiveStory'
+      : storyGameType;
+    const matchesType = selectedType === "all" || effectiveType === selectedType;
     const matchesDifficulty = selectedDifficulty === "all" || story.difficulty === selectedDifficulty;
 
     const matchesStoryKind =

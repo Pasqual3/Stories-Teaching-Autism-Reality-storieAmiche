@@ -2,7 +2,8 @@ import React, { memo } from 'react';
 
 // Card singola: React.memo evita re-render se props non cambiano
 const StoryCard = memo(({ story, onStoryClick, userData }) => {
-  const isEmoGame = story.gameType === 'emoGame';
+  const isAdaptiveStory = story.gameType === 'emoGame' && story.isAdaptive === true;
+  const isEmoGame = story.gameType === 'emoGame' && !isAdaptiveStory;
 
   // BUG1 FIX: usa il flag top-level isStrangeStoryActive salvato al momento della creazione della storia
   const hasTest = story.isStrangeStoryActive === true;
@@ -16,9 +17,11 @@ const StoryCard = memo(({ story, onStoryClick, userData }) => {
       className={`${story.color} p-5 rounded-3xl shadow-lg hover:shadow-2xl hover:scale-[1.03] transition-all duration-300 cursor-pointer flex flex-col justify-between h-64 border-4 group relative text-left ${
         isOwnStory
           ? 'border-emerald-300/80 shadow-emerald-100/40'
-          : isEmoGame
-            ? 'border-purple-200/80 shadow-purple-100/40'
-            : 'border-indigo-100 hover:border-indigo-200 shadow-indigo-100/30'
+          : isAdaptiveStory
+            ? 'border-amber-300/80 shadow-amber-100/40'
+            : isEmoGame
+              ? 'border-purple-200/80 shadow-purple-100/40'
+              : 'border-indigo-100 hover:border-indigo-200 shadow-indigo-100/30'
       }`}
     >
       {/* Header con Badge */}
@@ -33,7 +36,11 @@ const StoryCard = memo(({ story, onStoryClick, userData }) => {
         )}
         
         {/* Tipo di Gioco Badge - RIGHT */}
-        {isEmoGame ? (
+        {isAdaptiveStory ? (
+          <div className="bg-amber-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md border-2 border-amber-600 flex items-center gap-1 uppercase tracking-wider">
+            ● ADAPTIVE STORY
+          </div>
+        ) : isEmoGame ? (
           <div className="bg-purple-600 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-md border-2 border-purple-700 flex items-center gap-1 uppercase tracking-wider">
             ● EMOGAME
           </div>
@@ -56,7 +63,11 @@ const StoryCard = memo(({ story, onStoryClick, userData }) => {
         {/* Riga 1: Badge tipo e Data */}
         <div className="flex justify-between items-center w-full">
           <div>
-            {isEmoGame ? (
+            {isAdaptiveStory ? (
+              <span className="text-[8px] font-black bg-amber-100 text-amber-700 border-2 border-amber-300 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                🌈 {story.difficulty === 'DifI' ? 'Emoji' : story.difficulty === 'DifII' ? 'Immagini' : 'Video'}
+              </span>
+            ) : isEmoGame ? (
               <span className="text-[8px] font-black bg-purple-100 text-purple-700 border-2 border-purple-300 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
                 ⭐ {story.difficulty === 'DifI' ? 'Emoji' : story.difficulty === 'DifII' ? 'Immagini' : 'Video'}
               </span>

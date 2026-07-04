@@ -113,6 +113,7 @@ export const createEmoGame = async (req, res) => {
                     : true),
             isEmotionGameActive: false, // Force disabled
             isStrangeStoryActive: true, // Force enabled
+            isAdaptive: req.body.isAdaptive === 'true' || req.body.isAdaptive === true,
             backgroundColor: req.body.backgroundColor,
             status: determineInitialStatus(isTherapist, status),
             createdAt: new Date()

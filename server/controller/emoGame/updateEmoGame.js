@@ -140,6 +140,9 @@ export const updateEmoGame = async (req, res) => {
                     : emoGame.isPublic),
             isEmotionGameActive: false, // Force disabled
             isStrangeStoryActive: true, // Force enabled
+            isAdaptive: req.body.isAdaptive !== undefined
+                ? (req.body.isAdaptive === 'true' || req.body.isAdaptive === true)
+                : emoGame.isAdaptive,
             backgroundColor: req.body.backgroundColor || emoGame.backgroundColor,
             coverImage,
             status: req.body.status || emoGame.status

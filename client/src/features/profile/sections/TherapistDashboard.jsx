@@ -96,15 +96,15 @@ const UnlockModal = ({ onClose, onSuccess }) => {
 };
 
 const TherapistDashboard = ({
-  pendingInvitations,
-  pendingStories,
-  stories,
-  assignedFamilies,
+  pendingInvitations = [], // <-- Aggiunto default per prevenire errori undefined
+  pendingStories = [],     // <-- Aggiunto default
+  stories = [],            // <-- Aggiunto default
+  assignedFamilies = [],   // <-- Aggiunto default
   currentPlayingAudio,
   selectedStoryIdForReject,
   rejectReason,
-  savingStoryIds,
-  activeGenerations,
+  savingStoryIds = [],     // <-- Aggiunto default
+  activeGenerations = [],  // <-- Aggiunto default
   onSetCurrentPlayingAudio,
   onSetSelectedStoryIdForReject,
   onSetRejectReason,
@@ -127,7 +127,8 @@ const TherapistDashboard = ({
   const pendingEmoGames = pendingStories.filter(s => s.gameType === 'emoGame');
 
   const regularStories = stories.filter(s => (!s.gameType || s.gameType === 'story') && s.status !== 'DRAFT');
-  const emoGames = stories.filter(s => s.gameType === 'emoGame' && s.status !== 'DRAFT');
+  const emoGames = stories.filter(s => s.gameType === 'emoGame' && s.status !== 'DRAFT' && !s.isAdaptive);
+  const adaptiveStories = stories.filter(s => s.gameType === 'emoGame' && s.status !== 'DRAFT' && s.isAdaptive);
 
   const getEditRoute = (item) => item.gameType === 'emoGame' ? `/edit-emoGame/${item._id}` : `/edit-story/${item._id}`;
 
@@ -336,6 +337,21 @@ const TherapistDashboard = ({
                     {emoGames.length}
                   </span>
                 </button>
+                <button
+                  onClick={() => setActiveTab('adaptive')}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
+                    activeTab === 'adaptive'
+                      ? 'bg-purple-600 text-white shadow-md scale-[1.02]'
+                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-200/50'
+                  }`}
+                >
+                  <span>📖</span> Adaptive Story
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-black ${
+                    activeTab === 'adaptive' ? 'bg-purple-700 text-white' : 'bg-gray-200 text-gray-700'
+                  }`}>
+                    {adaptiveStories.length}
+                  </span>
+                </button>
               </div>
 
               {activeTab === 'stories' ? (
@@ -344,6 +360,13 @@ const TherapistDashboard = ({
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-2xl text-sm font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer border-none"
                 >
                   Nuova Storia ➕
+                </button>
+              ) : activeTab === 'adaptive' ? (
+                <button
+                  onClick={() => navigate('/adaptiveNarration')}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-2xl text-sm font-black shadow-md transition-all flex items-center gap-1.5 cursor-pointer border-none"
+                >
+                  Nuova Adaptive Story ➕
                 </button>
               ) : (
                 <button
@@ -391,7 +414,7 @@ const TherapistDashboard = ({
                 ))}
               </div>
             )
-          ) : (
+          ) : activeTab === 'emogames' ? (
             emoGames.length === 0 ? (
               <div className="bg-white p-10 rounded-2xl shadow-sm text-center text-gray-500">
                 Non hai ancora creato EmoGame definitivi.
@@ -430,30 +453,69 @@ const TherapistDashboard = ({
                 ))}
               </div>
             )
-          )}
-        </div>
-
-        {/* Bozze */}
-        {stories.some(s => s.status === 'DRAFT') && (
-          <div className="mt-8 p-6 bg-orange-50/50 rounded-3xl border-2 border-dashed border-orange-200">
-            <h2 className="text-xl font-bold text-orange-700 flex items-center gap-2 mb-4">📝 Bozze In Sospeso</h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {stories.filter(s => s.status === 'DRAFT').map(draft => (
-                <div key={draft._id} className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="px-2 py-1 bg-orange-100 text-orange-600 text-[10px] font-black rounded border border-orange-200">BOZZA</div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-sm">{draft.title || 'Bozza senza titolo'}</h3>
-                      <p className="text-[10px] text-gray-400 italic">Creata il {new Date(draft.createdAt).toLocaleDateString()}</p>
+          ) : (
+            adaptiveStories.length === 0 ? (
+              <div className="bg-white p-10 rounded-2xl shadow-sm text-center text-gray-500">
+                Non hai ancora creato Adaptive Story.
+                <button onClick={() => navigate('/adaptiveNarration')} className="mt-4 bg-purple-600 text-white px-6 py-2 rounded-full hover:bg-purple-700 transition-all font-bold block mx-auto w-fit">Crea un Adaptive Story</button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {adaptiveStories.map(story => (
+                  <div key={story._id} className="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow relative">
+                    <div className="absolute top-4 right-4 flex flex-col items-end gap-1">
+                      <span className="inline-flex items-center gap-1 bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full border border-purple-200">
+                        📖 Adaptive Story
+                      </span>
+                      <div className="text-xs font-bold px-2 py-1 rounded bg-green-100">
+                        <span className="text-green-600 flex items-center gap-1"><FaCheck size={10} /> Approvata</span>
+                      </div>
+                    </div>
+                    <h3 className="font-bold text-lg mb-2 truncate pr-24">{story.title}</h3>
+                    <p className="text-xs text-gray-500 mb-4 line-clamp-2">{story.description}</p>
+                    <div className="flex items-center gap-2 mb-4">
+                      <button onClick={() => onToggleVisibility(story)} className={`flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold transition-all ${story.isPublic ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                        {story.isPublic ? '🌍 Pubblica' : '🔒 Privata'}
+                      </button>
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => navigate(getEditRoute(story))} disabled={activeGenerations.includes(story._id) || savingStoryIds.includes(story._id)} className={`flex-1 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-1 transition-colors ${activeGenerations.includes(story._id) || savingStoryIds.includes(story._id) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-purple-50 text-purple-700 hover:bg-purple-100'}`}>
+                        <FaEdit size={12} /> Modifica
+                      </button>
+                      {onAssignStory && (
+                        <button onClick={() => onAssignStory(story)} className="bg-orange-50 text-orange-700 px-3 rounded-lg hover:bg-orange-100" title="Assegna ai pazienti"><FaChild /></button>
+                      )}
+                      <button onClick={() => navigate(`/emoGame/${story._id}`)} className="bg-white border border-gray-200 text-gray-600 px-3 rounded-lg hover:bg-gray-50"><FaEye /></button>
+                      <button onClick={() => onDeleteStory(story._id, story.title, 'emoGame')} className="bg-red-50 text-red-600 px-3 rounded-lg hover:bg-red-100"><FaTrash size={12} /></button>
                     </div>
                   </div>
-                  <button onClick={() => navigate(getEditRoute(draft))} disabled={activeGenerations.includes(draft._id) || savingStoryIds.includes(draft._id)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeGenerations.includes(draft._id) || savingStoryIds.includes(draft._id) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}>Continua Modifica</button>
-                </div>
-              ))}
+                ))}
+              </div>
+            )
+          )}
+
+          {/* Bozze */}
+          {stories.some(s => s.status === 'DRAFT') && (
+            <div className="mt-8 p-6 bg-orange-50/50 rounded-3xl border-2 border-dashed border-orange-200">
+              <h2 className="text-xl font-bold text-orange-700 flex items-center gap-2 mb-4">📝 Bozze In Sospeso</h2>
+              <div className="grid md:grid-cols-2 gap-4">
+                {stories.filter(s => s.status === 'DRAFT').map(draft => (
+                  <div key={draft._id} className="bg-white p-4 rounded-xl border border-orange-100 shadow-sm flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="px-2 py-1 bg-orange-100 text-orange-600 text-[10px] font-black rounded border border-orange-200">BOZZA</div>
+                      <div>
+                        <h3 className="font-bold text-gray-800 text-sm">{draft.title || 'Bozza senza titolo'}</h3>
+                        <p className="text-[10px] text-gray-400 italic">Creata il {new Date(draft.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => navigate(getEditRoute(draft))} disabled={activeGenerations.includes(draft._id) || savingStoryIds.includes(draft._id)} className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${activeGenerations.includes(draft._id) || savingStoryIds.includes(draft._id) ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-orange-100 text-orange-700 hover:bg-orange-200'}`}>Continua Modifica</button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div> 
+      </div> {/* <--- QUESTO E' IL DIV CHE MANCAVA! Chiude "lg:col-span-2 space-y-8" */}
 
       {/* COLONNA DESTRA: Famiglie */}
       <div>

@@ -154,6 +154,7 @@ const adaptiveStorytelling = () => {
         setIsSubmitting(true);
         const formData = form.buildFormData(intendedStatus);
         formData.append('userId', form.userData._id);
+        formData.append('isAdaptive', true);
 
         saveEmoGameInBackground(formData, id || null, true)
             .finally(() => setIsSubmitting(false));

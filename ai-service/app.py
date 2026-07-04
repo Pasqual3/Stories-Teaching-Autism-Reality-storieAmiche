@@ -744,7 +744,7 @@ def _offline_adaptive_story(topic, initial_emotion, child_name):
     """Storia adattiva statica in italiano, usata quando l'IA non è disponibile o fallisce."""
     nome = child_name or "il protagonista"
     return {
-        "title": f"Una storia su: {topic}"[:80],
+        "title": f"{topic}"[:80],
         "description": f"Narrazione adattiva generata offline sul tema \"{topic}\".",
         "scenes": [
             {

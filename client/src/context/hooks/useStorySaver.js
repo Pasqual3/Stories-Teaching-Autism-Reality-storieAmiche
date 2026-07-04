@@ -7,7 +7,7 @@ export const useStorySaver = (backendUrl, getUserData) => {
     const [isBackgroundSaving, setIsBackgroundSaving] = useState(false);
     const [savingStoryIds, setSavingStoryIds] = useState([]);
 
-    const saveEntity = useCallback(async (basePath, formData, entityId, silent, messages) => {
+    const saveEntity = useCallback(async (createPath, updatePath, formData, entityId, silent, messages) => {
         setIsBackgroundSaving(true);
         if (entityId) setSavingStoryIds(prev => [...prev, entityId]);
 
@@ -18,7 +18,7 @@ export const useStorySaver = (backendUrl, getUserData) => {
 
         try {
             axios.defaults.withCredentials = true;
-            const url = entityId ? `${backendUrl}${basePath}/${entityId}` : `${backendUrl}${basePath}`;
+            const url = entityId ? `${backendUrl}${updatePath}/${entityId}` : `${backendUrl}${createPath}`;
             const method = entityId ? 'put' : 'post';
             const { data } = await axios[method](url, formData);
 
@@ -26,7 +26,7 @@ export const useStorySaver = (backendUrl, getUserData) => {
                 if (toastId) {
                     toast.update(toastId, { render: messages.success, type: 'success', autoClose: 3000, closeButton: true });
                 }
-                if (basePath.includes('/story')) {
+                if (createPath.includes('/story')) {
                     try { sessionStorage.removeItem(CACHE_KEY); } catch { /* ignored */ }
                 }
                 getUserData();
@@ -51,7 +51,7 @@ export const useStorySaver = (backendUrl, getUserData) => {
     }, [backendUrl, getUserData]);
 
     const saveStoryInBackground = useCallback((formData, storyId = null, silent = false) =>
-        saveEntity('/api/story', formData, storyId, silent, {
+        saveEntity('/api/story/create', '/api/story/update', formData, storyId, silent, {
             pending: 'Salvataggio storia in corso... ⏳',
             success: '✅ Storia salvata con successo!',
             error: '❌ Errore: ',
@@ -60,7 +60,7 @@ export const useStorySaver = (backendUrl, getUserData) => {
         }), [saveEntity]);
 
     const saveEmoGameInBackground = useCallback((formData, emoGameId = null, silent = false) =>
-        saveEntity('/api/emoGame', formData, emoGameId, silent, {
+        saveEntity('/api/emoGame/create', '/api/emoGame/update', formData, emoGameId, silent, {
             pending: 'Salvataggio EmoGame in corso... ⏳',
             success: '✅ EmoGame salvato con successo!',
             error: '❌ Errore: ',

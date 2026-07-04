@@ -75,16 +75,29 @@ const SceneEditor = ({
                 )}
             </div>
 
+            {/* Testo narrato della scena (usato per l'audio narrato) */}
+            <div className="mb-6">
+                <label className="block text-xs font-bold text-purple-700 uppercase mb-2 tracking-wider">
+                    📖 Testo narrato della scena
+                </label>
+                <textarea
+                    value={paragraph.text}
+                    onChange={(e) => onUpdate(paragraph.id, 'text', e.target.value)}
+                    placeholder="Es: Aurora esce di casa con la mamma per andare al parco. Il sole splende e lei è felice."
+                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-medium resize-y shadow-sm"
+                />
+                <p className="text-[10px] text-gray-400 mt-1 italic">Questo testo viene letto ad alta voce nell'audio narrato della scena.</p>
+            </div>
+
             {/* Domanda da porre al bambino */}
             <div className="mb-6">
                 <label className="block text-xs font-bold text-purple-700 uppercase mb-2 tracking-wider">
                     ❓ Domanda da porre al bambino
                 </label>
                 <textarea
-                    value={paragraph.text}
+                    value={paragraph.strangeStoryTest?.question || ''}
                     onChange={(e) => {
                         const val = e.target.value;
-                        onUpdate(paragraph.id, 'text', val);
                         onUpdate(paragraph.id, 'strangeStoryTest', {
                             ...(paragraph.strangeStoryTest || {}),
                             question: val,
@@ -93,8 +106,9 @@ const SceneEditor = ({
                         });
                     }}
                     placeholder="Es: Cosa vedi nella scena? Quale emozione provano secondo te?"
-                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-medium resize-y shadow-sm"
+                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[80px] text-gray-700 font-medium resize-y shadow-sm"
                 />
+                <p className="text-[10px] text-gray-400 mt-1 italic">Questa è la domanda mostrata al bambino sotto la scena, con le opzioni di risposta qui sotto.</p>
             </div>
 
             {paragraph.text.trim().length > 0 && (
