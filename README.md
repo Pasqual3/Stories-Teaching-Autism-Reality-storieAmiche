@@ -53,7 +53,7 @@ Database: MongoDB 7.0  :27017
 ```
 
 <p align="center">
-<img width="2536" height="2181" alt="architettura" src="https://github.com/user-attachments/assets/8ed27300-9e77-43b3-8016-80f032bc86d9" />
+<img width="700" height="806" alt="storie_amiche_architettura_v2(1)" src="https://github.com/user-attachments/assets/56372ab1-2747-40ac-be4d-4b8a8996640d" />
 </p>
 
 ### 2.2 Albero Directory del Progetto

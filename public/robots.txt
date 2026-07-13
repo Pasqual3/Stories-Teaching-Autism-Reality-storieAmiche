@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /edit-story
+Disallow: /child-dashboard
+
+Sitemap: https://storieamiche.intint.qzz.io/sitemap.xml

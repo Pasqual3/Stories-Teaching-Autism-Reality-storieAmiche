@@ -5,7 +5,6 @@ import { uploadFile } from '../../utils/storageClient.js';
 import {
     extractMediaUrls,
     cleanupOldMedia,
-    processParagraphFiles,
     notifyTherapistEdit,
     notifyStoryUpdated,
     notifyTherapistsPending
@@ -67,7 +66,6 @@ export const updateEmoGame = async (req, res) => {
         }
 
         // Gestione file media (no narrationAudio per EmoGame)
-        let coverImage = emoGame.coverImage;
         if (req.files?.length > 0) {
             for (const file of req.files) {
                 if (file.fieldname === 'narrationAudio') continue; // ignorato
@@ -92,8 +90,13 @@ export const updateEmoGame = async (req, res) => {
                 // Se il paragrafo usa un preset Cloudinary, non ri-uploadare
                 if (paragraphs[index].isPresetMedia) continue;
 
-                const paraResult = await processParagraphFiles([file], paragraphs);
-                if (paraResult.coverImage) coverImage = paraResult.coverImage;
+                const uploadRes = await uploadFile(file.buffer, file.mimetype, 'storie_amiche/emogame_media');
+                if (!uploadRes.success) continue;
+
+                paragraphs[index].mediaUrl = uploadRes.url;
+                paragraphs[index].mediaType = file.mimetype.startsWith('video') ? 'video'
+                    : file.mimetype.startsWith('audio') ? 'audio'
+                        : 'image';
             }
         }
 
@@ -144,7 +147,6 @@ export const updateEmoGame = async (req, res) => {
                 ? (req.body.isAdaptive === 'true' || req.body.isAdaptive === true)
                 : emoGame.isAdaptive,
             backgroundColor: req.body.backgroundColor || emoGame.backgroundColor,
-            coverImage,
             status: req.body.status || emoGame.status
         });
 

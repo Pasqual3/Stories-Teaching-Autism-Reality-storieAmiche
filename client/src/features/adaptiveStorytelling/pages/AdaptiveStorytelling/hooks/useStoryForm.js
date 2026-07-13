@@ -225,10 +225,17 @@ export const useStoryForm = (storyId = null) => {
             isBranching: p.isBranching || false,
             mediaType: p.mediaType || 'none',
             color: p.color,
-            mediaUrl: p.media || '',
+            // Se c'è un rawFile da caricare, NON inviare il blob URL: il server assegnerà l'URL Cloudinary.
+            // Se invece è già un URL Cloudinary (nessun rawFile), mantienilo per non cancellare le immagini esistenti.
+            mediaUrl: p.rawFile ? '' : (p.media || ''),
             strangeStoryTest: p.strangeStoryTest ? {
                 ...p.strangeStoryTest,
-                active: true
+                active: true,
+                // Stessa logica per le immagini delle opzioni
+                options: (p.strangeStoryTest.options || []).map(opt => ({
+                    ...opt,
+                    imageUrl: opt.rawFile ? '' : (opt.imageUrl || ''),
+                }))
             } : { active: true, question: '', type: 'libera', options: [], correctAnswer: '', explanation: '' }
         }));
         formData.append('paragraphs', JSON.stringify(paragraphsData));

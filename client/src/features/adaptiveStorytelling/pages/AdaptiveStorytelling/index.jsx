@@ -48,7 +48,7 @@ const adaptiveStorytelling = () => {
             storyTitle: form.title || 'Bozza senza titolo',
             speakerName: audio.selectedVoice,
             speed: audio.selectedSpeed,
-        }, false);
+        }, false, '/api/emoGame/update');
 
         if (result?.audioUrls?.[0]) {
             const newUrl = result.audioUrls[0];

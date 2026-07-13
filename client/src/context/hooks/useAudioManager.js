@@ -40,6 +40,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
     const executeAudioJob = useCallback(async ({
         generationId, storyId, audioConfig, silent, onProgress,
         payloadBuilder, toastMessages, skipStartRequest = false, existingJobId = null,
+        updateEndpoint = '/api/story/update',
     }) => {
         return withGenerationLock(generationId, async () => {
             updateGenerationProgress(generationId, { scene_done: 0, scene_total: null, status: 'queued' });
@@ -63,7 +64,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
                         const payload = payloadBuilder(statusData);
                         const formData = new FormData();
                         Object.entries(payload).forEach(([k, v]) => v != null && formData.append(k, v));
-                        const updateRes = await axios.put(`${backendUrl}/api/story/update/${storyId}`, formData);
+                        const updateRes = await axios.put(`${backendUrl}${updateEndpoint}/${storyId}`, formData);
                         if (updateRes.data.success) {
                             updateGenerationProgress(generationId, { scene_done: statusData.scene_done, scene_total: statusData.scene_total, status: 'done' });
                             onProgress?.({ scene_done: statusData.scene_done, scene_total: statusData.scene_total, status: 'done' });
@@ -130,7 +131,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
         });
     }, [executeAudioJob]);
 
-    const generateSceneAudioInBackground = useCallback(async (storyId, sceneIndex, audioConfig, silent = false) => {
+    const generateSceneAudioInBackground = useCallback(async (storyId, sceneIndex, audioConfig, silent = false, updateEndpoint = '/api/story/update') => {
         if (!storyId) return null;
         const processingMessages = [
             "🎧 L'IA sta leggendo la scena...",
@@ -154,6 +155,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
                 if (audioConfig.intendedStatus) payload.status = audioConfig.intendedStatus;
                 return payload;
             },
+            updateEndpoint,
             toastMessages: {
                 start: "🎧 L'IA sta generando l'audio della scena in background...",
                 done: (timeStr) => `🎧 Audio scena ${sceneIndex + 1} generato in ${timeStr}!`,
