@@ -52,7 +52,7 @@ export const pollAudioJob = async (jobId, statusUrl, {
 
         if (statusData.status === 'done' && statusData.success) {
             await onDone(statusData, timeStr);
-            return 'done';
+            return statusData;
         }
 
         if (statusData.status === 'error') {

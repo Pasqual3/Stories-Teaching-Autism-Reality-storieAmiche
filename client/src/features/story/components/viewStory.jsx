@@ -7,7 +7,7 @@ import ProgressBar from '../../../shared/components/ProgressBar';
 import useSessionTracker from '../../../shared/hooks/useSessionTracker';
 import Navbar from '../../../shared/components/Navbar';
 import { Helmet } from 'react-helmet-async';
-import { renderFormattedText, resolveEmoji, stripAllMarkersKeepText } from '../../../shared/utils/textFormat';
+import { renderFormattedText, resolveEmoji, stripAllMarkersKeepText, parseTextForKaraoke } from '../../../shared/utils/textFormat';
 
 const optimizeCloudinaryUrl = (url, width = 800) => {
     if (!url || typeof url !== 'string') return url;
@@ -119,24 +119,18 @@ const ViewStory = () => {
 
     const pageBgColor = story?.backgroundColor || '#f0f4ff';
     const currentParagraph = story?.paragraphs[currentScene];
-    const cleanedParagraphText = stripAllMarkersKeepText(currentParagraph?.text);
-    const words = cleanedParagraphText.split(/\s+/).filter(Boolean) || [];
+    const karaokeWords = parseTextForKaraoke(currentParagraph?.text);
     const hasTest = currentParagraph?.strangeStoryTest?.active === true;
 
     const [audioDuration, setAudioDuration] = useState(0);
 
-    const getCharsNoSpaces = (txt) => {
-        const w = (txt || '').split(/\s+/).filter(Boolean);
-        return w.reduce((acc, word) => acc + word.length, 0);
-    };
-
-    const currentSceneChars = getCharsNoSpaces(cleanedParagraphText);
+    const currentSceneChars = karaokeWords.reduce((acc, w) => acc + w.text.length, 0);
     const estimatedCharsSpoken = audioDuration > 0 ? (currentTime / audioDuration) * currentSceneChars : 0;
 
     let accumulatedChars = 0;
     let currentWordIndexInScene = 0;
-    for (let i = 0; i < words.length; i++) {
-        accumulatedChars += words[i].length;
+    for (let i = 0; i < karaokeWords.length; i++) {
+        accumulatedChars += karaokeWords[i].text.length;
         if (estimatedCharsSpoken <= accumulatedChars) { currentWordIndexInScene = i; break; }
         currentWordIndexInScene = i;
     }
@@ -431,15 +425,15 @@ const ViewStory = () => {
                                 </div>
 
                                 <div className="flex-1 flex items-center min-h-0">
-                                    <p className="text-lg md:text-xl lg:text-2xl font-bold text-gray-800 leading-snug">
-                                        {words.map((word, i) => {
+                                    <p className="text-lg md:text-xl lg:text-2xl font-medium text-gray-800 leading-snug">
+                                        {karaokeWords.map((wordObj, i) => {
                                             const isHighlighted = isGlobalPlaying && i === currentWordIndexInScene;
                                             return (
                                                 <span
                                                     key={i}
-                                                    className={`inline-block mr-1.5 mb-1 ${isHighlighted ? 'bg-yellow-200 text-yellow-900 rounded-md px-1 py-0.5 transition-colors duration-300' : ''}`}
+                                                    className={`inline-block mr-1.5 mb-1 ${wordObj.isBold ? 'font-black' : ''} ${wordObj.isItalic ? 'italic' : ''} ${isHighlighted ? 'bg-yellow-200 text-yellow-900 rounded-md px-1 py-0.5 transition-colors duration-300' : ''}`}
                                                 >
-                                                    {word}
+                                                    {wordObj.text}
                                                 </span>
                                             );
                                         })}

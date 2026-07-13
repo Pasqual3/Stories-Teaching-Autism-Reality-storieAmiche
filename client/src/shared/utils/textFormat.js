@@ -104,6 +104,41 @@ export const renderFormattedText = (text) => {
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
+ * Analizza il testo per la modalità Karaoke (lettura parola per parola).
+ * Rimuove i marcatori audio, mantiene lo stato di formattazione (grassetto/corsivo)
+ * e restituisce un array di oggetti: { text: "parola", isBold: true/false, isItalic: true/false }.
+ */
+export const parseTextForKaraoke = (text) => {
+    if (!text || typeof text !== 'string') return [];
+    
+    const withoutAudio = stripAudioMarkers(text);
+    // Split by markers or whitespace, preserving markers as distinct tokens
+    const tokens = withoutAudio.split(/(\{\{.*?\}\}|\s+)/).filter(Boolean);
+    
+    const words = [];
+    let isBold = false;
+    let isItalic = false;
+    
+    for (const token of tokens) {
+        if (token.match(/^\s+$/)) continue; // salta spazi bianchi puri
+        
+        const tUpper = token.toUpperCase();
+        if (tUpper === '{{BOLD}}' || tUpper === '{{B}}') { isBold = true; continue; }
+        if (tUpper === '{{/BOLD}}' || tUpper === '{{/B}}') { isBold = false; continue; }
+        if (tUpper === '{{ITALIC}}' || tUpper === '{{I}}') { isItalic = true; continue; }
+        if (tUpper === '{{/ITALIC}}' || tUpper === '{{/I}}') { isItalic = false; continue; }
+        
+        // Se è un token di testo (non un marcatore noto), ripuliamolo da marcatori residui e aggiungiamolo
+        const cleanWord = token.replace(/\{\{\/?[A-Z_]+\}\}/gi, '');
+        if (cleanWord) {
+            words.push({ text: cleanWord, isBold, isItalic });
+        }
+    }
+    
+    return words;
+};
+
+/**
  * Mappa di fallback: alcune storie più vecchie hanno salvato nel campo "emoji"
  * un'etichetta testuale (es. "Felice", "Sospetto") invece del carattere emoji
  * vero e proprio. Qui la convertiamo nell'emoji corrispondente così non

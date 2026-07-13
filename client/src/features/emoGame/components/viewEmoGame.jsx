@@ -7,6 +7,7 @@ import ProgressBar from '../../../shared/components/ProgressBar';
 import useSessionTracker from '../../../shared/hooks/useSessionTracker';
 import Navbar from '../../../shared/components/Navbar';
 import { Helmet } from 'react-helmet-async';
+import { parseTextForKaraoke, renderFormattedText } from '../../../shared/utils/textFormat';
 
 const optimizeCloudinaryUrl = (url, width = 800) => {
     if (!url || typeof url !== 'string') return url;
@@ -155,23 +156,18 @@ const ViewEmoGame = () => {
 
     const pageBgColor = story?.backgroundColor || '#f0f4ff';
     const currentParagraph = story?.paragraphs[currentScene];
-    const words = currentParagraph?.text.split(/\s+/).filter(Boolean) || [];
+    const karaokeWords = parseTextForKaraoke(currentParagraph?.text);
     const hasTest = currentParagraph?.strangeStoryTest?.active === true;
 
     const [audioDuration, setAudioDuration] = useState(0);
 
-    const getCharsNoSpaces = (txt) => {
-        const w = (txt || '').split(/\s+/).filter(Boolean);
-        return w.reduce((acc, word) => acc + word.length, 0);
-    };
-
-    const currentSceneChars = getCharsNoSpaces(currentParagraph?.text);
+    const currentSceneChars = karaokeWords.reduce((acc, w) => acc + w.text.length, 0);
     const estimatedCharsSpoken = audioDuration > 0 ? (currentTime / audioDuration) * currentSceneChars : 0;
 
     let accumulatedChars = 0;
     let currentWordIndexInScene = 0;
-    for (let i = 0; i < words.length; i++) {
-        accumulatedChars += words[i].length;
+    for (let i = 0; i < karaokeWords.length; i++) {
+        accumulatedChars += karaokeWords[i].text.length;
         if (estimatedCharsSpoken <= accumulatedChars) { currentWordIndexInScene = i; break; }
         currentWordIndexInScene = i;
     }
@@ -630,14 +626,14 @@ const ViewEmoGame = () => {
                                 {/* Testo Domanda */}
                                 <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-200">
                                     <p className="text-lg md:text-xl font-extrabold text-amber-950 leading-snug break-words">
-                                        {words.map((word, i) => {
+                                        {karaokeWords.map((wordObj, i) => {
                                             const isHighlighted = isGlobalPlaying && i === currentWordIndexInScene;
                                             return (
                                                 <span
                                                     key={i}
-                                                    className={`inline-block mr-1.5 mb-0.5 ${isHighlighted ? 'bg-yellow-200 text-yellow-900 rounded px-1 transition-colors duration-300' : ''}`}
+                                                    className={`inline-block mr-1.5 mb-0.5 ${wordObj.isBold ? 'font-black' : ''} ${wordObj.isItalic ? 'italic' : ''} ${isHighlighted ? 'bg-yellow-200 text-yellow-900 rounded px-1 transition-colors duration-300' : ''}`}
                                                 >
-                                                    {word}
+                                                    {wordObj.text}
                                                 </span>
                                             );
                                         })}

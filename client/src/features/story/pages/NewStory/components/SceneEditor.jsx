@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FaTrash } from 'react-icons/fa';
+import TextFormatToolbar from '../../../../../shared/components/TextFormatToolbar';
+import { renderFormattedText } from '../../../../../shared/utils/textFormat';
 
 const SceneEditor = ({
     paragraph,
@@ -16,6 +18,8 @@ const SceneEditor = ({
     isSceneRegenerating,
 }) => {
     const [showMediaOptions, setShowMediaOptions] = useState(false);
+    const textareaRef = useRef(null);
+    const strangeStoryRef = useRef(null);
 
     return (
         <div className={`p-6 rounded-2xl shadow-xl border transition-all ${paragraph.color === 'bg-white' ? 'border-gray-200' : 'border-gray-100'
@@ -58,12 +62,30 @@ const SceneEditor = ({
             )}
 
             {/* Testo scena */}
-            <textarea
-                value={paragraph.text}
-                onChange={(e) => onUpdate(paragraph.id, 'text', e.target.value)}
-                placeholder="Scrivi qui il testo della scena..."
-                className="w-full p-4 mb-3 border border-gray-200 rounded-xl focus:border-purple-400 bg-white/80 min-h-[100px] resize-y"
-            />
+            <div className="mb-6">
+                <label className="block text-xs font-bold text-purple-700 uppercase mb-2 tracking-wider">
+                    📖 Testo narrato della scena
+                </label>
+                <TextFormatToolbar
+                    textareaRef={textareaRef}
+                    value={paragraph.text}
+                    onChange={(newVal) => onUpdate(paragraph.id, 'text', newVal)}
+                />
+                <textarea
+                    ref={textareaRef}
+                    value={paragraph.text}
+                    onChange={(e) => onUpdate(paragraph.id, 'text', e.target.value)}
+                    placeholder="Scrivi qui il testo della scena..."
+                    className="w-full p-4 mb-2 border border-gray-200 rounded-xl focus:border-purple-400 bg-white/80 min-h-[100px] resize-y font-mono text-sm text-gray-500"
+                />
+                {/* Anteprima formattata — mostra grassetto/corsivo reali */}
+                {/\{\{(?:BOLD|ITALIC|B|I)[^}]*\}\}/i.test(paragraph.text) && (
+                    <div className="mb-3 px-4 py-3 rounded-xl border border-purple-100 bg-purple-50/50 text-sm text-gray-800 leading-relaxed">
+                        <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block mb-1">Anteprima formattata</span>
+                        <span>{renderFormattedText(paragraph.text)}</span>
+                    </div>
+                )}
+            </div>
 
             {paragraph.text.trim().length > 0 && (
                 <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -192,14 +214,23 @@ const SceneEditor = ({
                             {/* Domanda */}
                             <div>
                                 <label className="block text-[10px] font-black text-orange-600 uppercase mb-1 tracking-wider">Domanda per il bambino</label>
+                                <TextFormatToolbar
+                                    textareaRef={strangeStoryRef}
+                                    value={paragraph.strangeStoryTest?.question || ''}
+                                    onChange={(newVal) => onUpdate(paragraph.id, 'strangeStoryTest', {
+                                        ...(paragraph.strangeStoryTest || {}),
+                                        question: newVal
+                                    })}
+                                />
                                 <textarea
+                                    ref={strangeStoryRef}
                                     value={paragraph.strangeStoryTest?.question || ''}
                                     onChange={(e) => onUpdate(paragraph.id, 'strangeStoryTest', {
                                         ...(paragraph.strangeStoryTest || {}),
                                         question: e.target.value
                                     })}
                                     placeholder="Es: Perché secondo te il personaggio ha detto questa cosa?"
-                                    className="w-full p-4 border-2 border-orange-100 rounded-xl focus:border-orange-400 outline-none bg-white text-gray-700 shadow-inner resize-none"
+                                    className="w-full p-4 border-2 border-orange-100 rounded-xl focus:border-orange-400 outline-none bg-white text-gray-700 shadow-inner resize-none mt-2"
                                     rows="2"
                                 />
                             </div>

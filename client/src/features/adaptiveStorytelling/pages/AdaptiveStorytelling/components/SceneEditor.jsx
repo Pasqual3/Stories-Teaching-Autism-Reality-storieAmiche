@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { usePresets } from '../../../presets/config';
+import TextFormatToolbar from '../../../../../shared/components/TextFormatToolbar';
+import { renderFormattedText } from '../../../../../shared/utils/textFormat';
 
 const SceneEditor = ({
     paragraph,
@@ -19,6 +21,7 @@ const SceneEditor = ({
 }) => {
     const [showPresetsModal, setShowPresetsModal] = React.useState(false);
     const { presets, isLoadingPresets } = usePresets();
+    const textareaRef = useRef(null);
 
     return (
         <div className={`p-6 rounded-2xl shadow-xl border transition-all ${paragraph.color === 'bg-white' ? 'border-gray-200' : 'border-gray-100'
@@ -80,12 +83,24 @@ const SceneEditor = ({
                 <label className="block text-xs font-bold text-purple-700 uppercase mb-2 tracking-wider">
                     📖 Testo narrato della scena
                 </label>
+                <TextFormatToolbar
+                    textareaRef={textareaRef}
+                    value={paragraph.text}
+                    onChange={(newVal) => onUpdate(paragraph.id, 'text', newVal)}
+                />
                 <textarea
+                    ref={textareaRef}
                     value={paragraph.text}
                     onChange={(e) => onUpdate(paragraph.id, 'text', e.target.value)}
                     placeholder="Es: Aurora esce di casa con la mamma per andare al parco. Il sole splende e lei è felice."
-                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-medium resize-y shadow-sm"
+                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-mono text-sm resize-y shadow-sm"
                 />
+                {/\{\{(?:BOLD|ITALIC|B|I)[^}]*\}\}/i.test(paragraph.text) && (
+                    <div className="mt-2 px-4 py-3 rounded-xl border border-purple-100 bg-purple-50/50 text-sm text-gray-800 leading-relaxed">
+                        <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block mb-1">Anteprima formattata</span>
+                        <span>{renderFormattedText(paragraph.text)}</span>
+                    </div>
+                )}
                 <p className="text-[10px] text-gray-400 mt-1 italic">Questo testo viene letto ad alta voce nell'audio narrato della scena.</p>
             </div>
 

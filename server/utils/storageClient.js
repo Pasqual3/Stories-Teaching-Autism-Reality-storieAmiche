@@ -40,13 +40,25 @@ export const uploadFile = async (fileBuffer, mimetype, folder = 'storie_amiche')
  * @returns {{ success, url, publicId }}
  */
 export const uploadAudioBase64 = async (base64Data, folder = 'storie_amiche/audio', format = 'wav') => {
-    const response = await fetch(`${STORAGE_SERVICE_URL}/upload-base64`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Data, folder, format })
-    });
+    let result;
+    try {
+        const response = await fetch(`${STORAGE_SERVICE_URL}/upload-base64`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ base64Data, folder, format })
+        });
+        result = await response.json();
 
-    return await response.json();
+        if (!response.ok || !result?.success || !result?.url) {
+            throw new Error(result?.message || `storage-service ha risposto ${response.status} senza URL`);
+        }
+    } catch (error) {
+        // Propaga sempre l'errore: chi chiama questa funzione deve sapere
+        // che l'upload NON è andato a buon fine, non ricevere un URL vuoto.
+        throw new Error(`Upload audio su Cloudinary fallito: ${error.message}`);
+    }
+
+    return result;
 };
 
 /**

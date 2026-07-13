@@ -224,10 +224,9 @@ export const useStoryForm = (storyId = null) => {
             imageSuggestion: p.imageSuggestion || '',
             isBranching: p.isBranching || false,
             mediaType: p.mediaType || 'none',
-            color: p.color,
-            // Se c'è un rawFile da caricare, NON inviare il blob URL: il server assegnerà l'URL Cloudinary.
-            // Se invece è già un URL Cloudinary (nessun rawFile), mantienilo per non cancellare le immagini esistenti.
             mediaUrl: p.rawFile ? '' : (p.media || ''),
+            color: p.color,
+            narrationUrl: p.narrationUrl || null,
             strangeStoryTest: p.strangeStoryTest ? {
                 ...p.strangeStoryTest,
                 active: true,

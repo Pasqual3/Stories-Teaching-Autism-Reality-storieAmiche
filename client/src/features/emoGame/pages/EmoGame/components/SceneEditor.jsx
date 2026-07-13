@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { FaTrash } from 'react-icons/fa';
 import { usePresets } from '../../../presets/config';
+import TextFormatToolbar from '../../../../../shared/components/TextFormatToolbar';
+import { renderFormattedText } from '../../../../../shared/utils/textFormat';
 
 const SceneEditor = ({
     paragraph,
@@ -19,6 +21,7 @@ const SceneEditor = ({
 }) => {
     const [showPresetsModal, setShowPresetsModal] = React.useState(false);
     const { presets, isLoadingPresets } = usePresets();
+    const textareaRef = useRef(null);
 
     return (
         <div className={`p-6 rounded-2xl shadow-xl border transition-all ${paragraph.color === 'bg-white' ? 'border-gray-200' : 'border-gray-100'
@@ -121,7 +124,21 @@ const SceneEditor = ({
                 <label className="block text-xs font-bold text-purple-700 uppercase mb-2 tracking-wider">
                     ❓ Domanda da porre al bambino
                 </label>
+                <TextFormatToolbar
+                    textareaRef={textareaRef}
+                    value={paragraph.text}
+                    onChange={(newVal) => {
+                        onUpdate(paragraph.id, 'text', newVal);
+                        onUpdate(paragraph.id, 'strangeStoryTest', {
+                            ...(paragraph.strangeStoryTest || {}),
+                            question: newVal,
+                            active: true,
+                            type: 'blocchi_immagine',
+                        });
+                    }}
+                />
                 <textarea
+                    ref={textareaRef}
                     value={paragraph.text}
                     onChange={(e) => {
                         const val = e.target.value;
@@ -134,8 +151,14 @@ const SceneEditor = ({
                         });
                     }}
                     placeholder="Es: Cosa vedi nella scena? Quale emozione provano secondo te?"
-                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-medium resize-y shadow-sm"
+                    className="w-full p-4 border border-purple-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white/90 min-h-[100px] text-gray-700 font-mono text-sm resize-y shadow-sm"
                 />
+                {/\{\{(?:BOLD|ITALIC|B|I)[^}]*\}\}/i.test(paragraph.text) && (
+                    <div className="mt-2 px-4 py-3 rounded-xl border border-purple-100 bg-purple-50/50 text-sm text-gray-800 leading-relaxed">
+                        <span className="text-[9px] font-black text-purple-400 uppercase tracking-widest block mb-1">Anteprima formattata</span>
+                        <span>{renderFormattedText(paragraph.text)}</span>
+                    </div>
+                )}
             </div>
 
             {/* Colore della Scheda */}

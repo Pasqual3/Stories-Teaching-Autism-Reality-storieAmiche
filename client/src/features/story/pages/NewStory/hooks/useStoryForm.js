@@ -216,6 +216,7 @@ export const useStoryForm = (storyId = null) => {
             gameText: p.gameText,
             emotion: p.emotion || '',
             mediaType: p.mediaType || 'none',
+            mediaUrl: (p.media && p.media.startsWith('http')) ? p.media : null,
             color: p.color,
             narrationUrl: p.narrationUrl || null,
             strangeStoryTest: p.strangeStoryTest || { active: false, question: '', type: 'libera', options: [], correctAnswer: '', explanation: '' }

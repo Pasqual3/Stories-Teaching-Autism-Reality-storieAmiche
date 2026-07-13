@@ -138,20 +138,36 @@ const NewStory = () => {
         const sceneIndex = form.paragraphs.findIndex((p) => p.id === paragraphId);
         setSceneGeneratingId(paragraphId);
 
-        const result = await generateSceneAudioInBackground(id, sceneIndex, {
-            texts: [text],
-            storyTitle: form.title || 'Bozza senza titolo',
-            speakerName: audio.selectedVoice,
-            speed: audio.selectedSpeed,
-            // NON passiamo intendedStatus per non degradare lo stato della storia
-        }, false);
+        // Aggiorna il form locale quando il job audio termina
+        // (executeAudioJob non ritorna i dati, notifica solo via onProgress)
+        const handleSceneAudioProgress = ({ status, _statusData } = {}) => {
+            // non usato — l'aggiornamento avviene nel onDone interno che fa il PUT
+        };
 
-        if (result?.audioUrls?.[0]) {
-            const newUrl = result.audioUrls[0];
-            form.setParagraphs(prev => prev.map((p) =>
-                p.id === paragraphId ? { ...p, narrationUrl: newUrl } : p
-            ));
-        }
+        // Sovrascriviamo payloadBuilder NON disponibile dall'esterno:
+        // usiamo onProgress per intercettare gli audio URL dal pollAudioJob
+        // tramite il campo "status: done" nel progress tick.
+        // La soluzione corretta è passare un onDone callback aggiuntivo.
+        await generateSceneAudioInBackground(
+            id,
+            sceneIndex,
+            {
+                texts: [text],
+                storyTitle: form.title || 'Bozza senza titolo',
+                speakerName: audio.selectedVoice,
+                speed: audio.selectedSpeed,
+            },
+            false,
+            '/api/story/update',
+            // Callback chiamata con l'URL audio appena il job finisce
+            (audioUrl) => {
+                if (audioUrl) {
+                    form.setParagraphs(prev => prev.map((p) =>
+                        p.id === paragraphId ? { ...p, narrationUrl: audioUrl } : p
+                    ));
+                }
+            }
+        );
 
         setSceneGeneratingId(null);
     };

@@ -68,6 +68,19 @@ export const getAudioStatus = async (req, res) => {
         const { jobId } = req.params;
         const result = await pollAudioJob(jobId);
 
+        // Riporta la storia a bozza dopo un fallimento irreversibile (es. upload Cloudinary),
+        // così l'utente può rigenerare l'audio invece di restare bloccato su GENERATING_AUDIO.
+        const resetStoryToDraft = async () => {
+            try {
+                await storyModel.updateOne(
+                    { audioJobId: jobId },
+                    { $set: { status: 'DRAFT', audioJobId: '', audioCompletionStatus: '' } }
+                );
+            } catch (dbErr) {
+                logger.error('Errore reset story dopo fallimento upload', { error: dbErr.message, jobId });
+            }
+        };
+
         // Job scaduto — reset story
         if (!result.success && result.status === 'not_found') {
             try {
@@ -102,35 +115,52 @@ export const getAudioStatus = async (req, res) => {
 
             // ── MODALITÀ ELEVENLABS: file audio unico ──────────────────────────
             if (result.mode === 'single' && result.audioData) {
-                const uploadResponse = await uploadAudioBase64(result.audioData);
-                const narrationUrl = uploadResponse?.url || '';
+                try {
+                    const uploadResponse = await uploadAudioBase64(result.audioData);
 
-                return res.json({
-                    success:         true,
-                    status:          'done',
-                    mode:            'single',
-                    audioUrls:       [narrationUrl],
-                    sceneTimestamps: result.sceneTimestamps || [],
-                    syncDataArray:   result.syncDataArray   || []
-                });
+                    return res.json({
+                        success:         true,
+                        status:          'done',
+                        mode:            'single',
+                        audioUrls:       [uploadResponse.url],
+                        sceneTimestamps: result.sceneTimestamps || [],
+                        syncDataArray:   result.syncDataArray   || []
+                    });
+                } catch (uploadErr) {
+                    logger.error('Errore upload Cloudinary (single)', { error: uploadErr.message, jobId });
+                    await resetStoryToDraft();
+                    return res.status(502).json({
+                        success: false,
+                        status:  'error',
+                        message: `Audio generato ma upload su Cloudinary fallito: ${uploadErr.message}`
+                    });
+                }
             }
 
             // ── MODALITÀ ELEVENLABS: file audio splittati per scena ────────────
             if (result.mode === 'split' && result.audioDataArray) {
-                const uploadPromises = result.audioDataArray.map(async (base64Data) => {
-                    const uploadResponse = await uploadAudioBase64(base64Data);
-                    return uploadResponse?.url || '';
-                });
-                const audioUrls = await Promise.all(uploadPromises);
+                try {
+                    const uploadPromises = result.audioDataArray.map(base64Data => uploadAudioBase64(base64Data));
+                    const uploadResponses = await Promise.all(uploadPromises);
+                    const audioUrls = uploadResponses.map(r => r.url);
 
-                return res.json({
-                    success:         true,
-                    status:          'done',
-                    mode:            'split',
-                    audioUrls:       audioUrls,
-                    sceneTimestamps: result.sceneTimestamps || [],
-                    syncDataArray:   result.syncDataArray   || []
-                });
+                    return res.json({
+                        success:         true,
+                        status:          'done',
+                        mode:            'split',
+                        audioUrls:       audioUrls,
+                        sceneTimestamps: result.sceneTimestamps || [],
+                        syncDataArray:   result.syncDataArray   || []
+                    });
+                } catch (uploadErr) {
+                    logger.error('Errore upload Cloudinary (split)', { error: uploadErr.message, jobId });
+                    await resetStoryToDraft();
+                    return res.status(502).json({
+                        success: false,
+                        status:  'error',
+                        message: `Audio generato ma upload su Cloudinary fallito: ${uploadErr.message}`
+                    });
+                }
             }
         }
 

@@ -40,7 +40,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
     const executeAudioJob = useCallback(async ({
         generationId, storyId, audioConfig, silent, onProgress,
         payloadBuilder, toastMessages, skipStartRequest = false, existingJobId = null,
-        updateEndpoint = '/api/story/update',
+        updateEndpoint = '/api/story/update', onDoneExtra = null,
     }) => {
         return withGenerationLock(generationId, async () => {
             updateGenerationProgress(generationId, { scene_done: 0, scene_total: null, status: 'queued' });
@@ -62,13 +62,22 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
                     isLoggedinRef,
                     onDone: async (statusData, timeStr) => {
                         const payload = payloadBuilder(statusData);
+                        // Se il backend ha forzato la bozza (es. crediti esauriti), non forzare il nuovo status
+                        if (statusData.use_browser_tts && payload.status) {
+                            delete payload.status;
+                        }
                         const formData = new FormData();
                         Object.entries(payload).forEach(([k, v]) => v != null && formData.append(k, v));
                         const updateRes = await axios.put(`${backendUrl}${updateEndpoint}/${storyId}`, formData);
                         if (updateRes.data.success) {
                             updateGenerationProgress(generationId, { scene_done: statusData.scene_done, scene_total: statusData.scene_total, status: 'done' });
                             onProgress?.({ scene_done: statusData.scene_done, scene_total: statusData.scene_total, status: 'done' });
-                            toast.update(toastId, { render: toastMessages.done(timeStr), type: 'success', autoClose: 5000 });
+                            if (statusData.use_browser_tts) {
+                                toast.update(toastId, { render: "⚠️ " + (statusData.message || "Generazione non riuscita. Reimpostata a bozza."), type: 'warning', autoClose: 8000 });
+                            } else {
+                                toast.update(toastId, { render: toastMessages.done(timeStr), type: 'success', autoClose: 5000 });
+                            }
+                            onDoneExtra?.(statusData);
                             getUserData();
                         }
                     },
@@ -131,7 +140,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
         });
     }, [executeAudioJob]);
 
-    const generateSceneAudioInBackground = useCallback(async (storyId, sceneIndex, audioConfig, silent = false, updateEndpoint = '/api/story/update') => {
+    const generateSceneAudioInBackground = useCallback(async (storyId, sceneIndex, audioConfig, silent = false, updateEndpoint = '/api/story/update', onSceneDone = null) => {
         if (!storyId) return null;
         const processingMessages = [
             "🎧 L'IA sta leggendo la scena...",
@@ -156,6 +165,11 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
                 return payload;
             },
             updateEndpoint,
+            // Dopo che il PUT è andato a buon fine, notifica il chiamante con l'URL
+            onDoneExtra: (statusData) => {
+                const audioUrl = statusData.audioUrls?.[0] || null;
+                onSceneDone?.(audioUrl);
+            },
             toastMessages: {
                 start: "🎧 L'IA sta generando l'audio della scena in background...",
                 done: (timeStr) => `🎧 Audio scena ${sceneIndex + 1} generato in ${timeStr}!`,
@@ -170,6 +184,7 @@ export const useAudioManager = (backendUrl, getUserData, isLoggedinRef) => {
             },
         });
     }, [executeAudioJob]);
+
 
     const resumeAudioJob = useCallback(async (storyId, jobId, intendedStatus = null, silent = false, onProgress = null) => {
         if (!storyId || !jobId) return null;
